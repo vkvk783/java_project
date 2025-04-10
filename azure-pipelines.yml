@@ -9,10 +9,10 @@ trigger:
 variables:
 
   # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: '9292b30f-8c84-449e-babe-e773b1bd0e6d'
+  azureSubscription: '94f5cfc1-06a4-4858-93fa-54b1083eab1c'
 
   # Web app name
-  webAppName: 'icy-mushroom-02533510f.6'
+  webAppName: 'java-project'
 
   # Environment name
   environmentName: 'production'
