@@ -12,10 +12,10 @@ variables:
   azureSubscription: '94f5cfc1-06a4-4858-93fa-54b1083eab1c'
 
   # Web app name
-  webAppName: 'java-project'
+ # webAppName: 'java-project'
 
   # Environment name
-  environmentName: 'production'
+  #environmentName: 'production'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -59,7 +59,7 @@ stages:
   jobs:
   - deployment: DeployLinuxWebApp
     displayName: Deploy Linux Web App
-    environment: $(environmentName)
+   # environment: $(environmentName)
     pool:
       vmImage: $(vmImageName)
     strategy:
@@ -71,5 +71,5 @@ stages:
             inputs:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
-              appName: $(webAppName)
+             # appName: $(webAppName)
               package: '$(Pipeline.Workspace)/drop/**/target/*.?(war|jar)'
