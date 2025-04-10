@@ -12,7 +12,7 @@ variables:
   azureSubscription: '94f5cfc1-06a4-4858-93fa-54b1083eab1c'
 
   # Web app name
-  webAppName: 'default'
+  #webAppName: 'my-simple-project'
 
   # Environment name
   environmentName: 'production'
@@ -71,5 +71,5 @@ stages:
             inputs:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
-              appName: $(webAppName)
+              #appName: $(webAppName)
               package: '$(Pipeline.Workspace)/drop/**/target/*.?(war|jar)'
