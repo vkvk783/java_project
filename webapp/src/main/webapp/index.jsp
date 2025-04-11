@@ -7,7 +7,7 @@
   </head>
   <body>
     <center> 
-      <font color="Black" size="7">  Hello This My Java Project  </font>
+      <font color="red" size="7">  <h1>Hello This My Java Project</h1> </font>
       <br><br>
       <font color="Red" size="5"> 
       The date now is: <%= new java.util.Date() %>
