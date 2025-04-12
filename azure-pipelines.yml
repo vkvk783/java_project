@@ -1,10 +1,12 @@
 trigger:
 - main  # Or your main branch
 
-pool:
-  vmImage: 'ubuntu-latest'
+variables:
 
-azureSubscription: '94f5cfc1-06a4-4858-93fa-54b1083eab1c'
+  # Azure Resource Manager connection created during pipeline creation
+  azureSubscription: '94f5cfc1-06a4-4858-93fa-54b1083eab1c'
+  # Agent VM image name
+  vmImage: 'ubuntu-latest'
 
 steps:
 - task: Maven@3
