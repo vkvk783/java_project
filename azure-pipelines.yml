@@ -33,8 +33,16 @@ stages:
         jdkVersionOption: '1.17' 
         jdkArchitectureOption: 'x64'
         publishJUnitResults: true
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
         goals: 'clean package'
+        
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+    - task: PublishCodeCoverageResults@2
+      inputs:
+        summaryFileLocation: '/target/site/jacoco/jacoco.xml'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to artifact staging directory'
@@ -44,4 +52,5 @@ stages:
         TargetFolder: $(Build.ArtifactStagingDirectory)
 
     - upload: $(Build.ArtifactStagingDirectory)
+
       artifact: drop
