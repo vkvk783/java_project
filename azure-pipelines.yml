@@ -50,10 +50,26 @@ stages:
         configMode: 'manual'
         cliProjectKey: 'vkdevops_java-app'
         cliProjectName: 'java-app'
-        cliSources: 'sonarcloud-sample-project/src/main/java'
+        cliSources: 'java_project/server/src/main/java/com/example'
         extraProperties: |
           sonar.junit.reportPaths=target/surefire-reports
           sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
+    # Step 5: Run SonarCloud Analysis
+    - task: Maven@4
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'sonar:sonar'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.7'
+        mavenVersionOption: 'Default'
+        mavenAuthenticateFeed: false
+        effectivePomSkip: false
+        sonarQubeRunAnalysis: false
+
+    # Step 6: Publish SonarCloud Quality Gate Result
+    - task: SonarCloudPublish@2
+      inputs:
+        pollingTimeoutSec: '300'
 
     - task: CopyFiles@2
       displayName: 'Copy Files to artifact staging directory'
