@@ -40,6 +40,20 @@ stages:
       inputs:
         summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
         failIfCoverageEmpty: true
+        
+    # Step 4: SonarCloud Analysis Preparation
+    - task: SonarCloudPrepare@3
+      inputs:
+        SonarCloud: 'SonarQube Cloud'
+        organization: 'vkdevops'
+        scannerMode: 'other'
+        configMode: 'manual'
+        cliProjectKey: 'vkdevops_java-app'
+        cliProjectName: 'java-app'
+        cliSources: 'sonarcloud-sample-project/src/main/java'
+        extraProperties: |
+          sonar.junit.reportPaths=target/surefire-reports
+          sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
 
     - task: CopyFiles@2
       displayName: 'Copy Files to artifact staging directory'
