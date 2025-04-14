@@ -48,6 +48,7 @@ stages:
         organization: 'vkvk783'
         scannerMode: 'cli'
         configMode: 'file'
+        cliProjectKey: vkvk783_java_project
         configFile: 'java_project/sonar-project.properties'
         extraProperties: |
           sonar.junit.reportPaths=target/surefire-reports
