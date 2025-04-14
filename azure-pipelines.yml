@@ -46,7 +46,7 @@ stages:
       inputs:
         SonarQube: 'SonarQube Cloud'
         organization: 'vkdevops'
-        scannerMode: 'other'
+        scannerMode: 'cli'
         configMode: 'manual'
         cliProjectKey: 'vkdevops_java-app'
         cliProjectName: 'java-app'
