@@ -46,12 +46,7 @@ stages:
       inputs:
         SonarQube: 'SonarQube Cloud'
         organization: 'vkvk783'
-        scannerMode: 'cli'
-        configMode: 'file'
-        cliProjectKey: vkvk783_java_project
-        extraProperties: |
-          sonar.junit.reportPaths=target/surefire-reports
-          sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
+        scannerMode: 'other'
 
     - task: SonarCloudPublish@3
       inputs:
