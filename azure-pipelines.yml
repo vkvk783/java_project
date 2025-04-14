@@ -40,7 +40,7 @@ stages:
         testResultsFormat: 'JUnit'
         testResultsFiles: '**/surefire-reports/TEST-*.xml'
 
-    - task: PublishCodeCoverageResults@2
+    - task: PublishCodeCoverageResults@1
       inputs:
         summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
 
