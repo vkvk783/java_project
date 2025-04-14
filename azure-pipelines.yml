@@ -48,6 +48,7 @@ stages:
         organization: 'vkvk783'
         scannerMode: 'cli'
         configMode: 'file'
+        configFile: 'java_project/sonar-project.properties'
         extraProperties: |
           sonar.junit.reportPaths=target/surefire-reports
           sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
