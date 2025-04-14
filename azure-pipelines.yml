@@ -55,6 +55,14 @@ stages:
           sonar.junit.reportPaths=target/surefire-reports
           sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
 
+    - task: SonarCloudPublish@3
+      inputs:
+        pollingTimeoutSec: '300'
+
+    - task: SonarCloudAnalyze@3
+      inputs:
+        jdkversion: 'JAVA_HOME_17_X64'
+
     - task: CopyFiles@2
       displayName: 'Copy Files to artifact staging directory'
       inputs:
