@@ -45,11 +45,11 @@ stages:
     - task: SonarCloudPrepare@3
       inputs:
         SonarQube: 'SonarQube Cloud'
-        organization: 'vkdevops'
+        organization: 'vkvk783'
         scannerMode: 'cli'
         configMode: 'manual'
-        cliProjectKey: 'vkdevops_java-app'
-        cliProjectName: 'java-app'
+        cliProjectKey: 'vkvk783_java_project'
+        cliProjectName: 'java_project'
         cliSources: 'java_project/server/src/main/java/com/example'
         extraProperties: |
           sonar.junit.reportPaths=target/surefire-reports
