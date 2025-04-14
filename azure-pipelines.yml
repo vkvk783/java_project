@@ -35,14 +35,10 @@ stages:
         publishJUnitResults: true
         goals: 'clean package'
         
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
-
-    - task: PublishCodeCoverageResults@1
+    - task: PublishCodeCoverageResults@2
       inputs:
         summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
+        failIfCoverageEmpty: true
 
     - task: CopyFiles@2
       displayName: 'Copy Files to artifact staging directory'
