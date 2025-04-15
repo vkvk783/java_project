@@ -54,7 +54,7 @@ stages:
         SonarQube: 'SonarQube Cloud'
         organization: 'vkvk783'
         scannerMode: 'cli'
-        configMode: 'file'      
+        configMode: 'manual'      
         cliProjectKey: 'vkvk783_java_project'
         cliProjectName: 'java_project'
         cliSources: 'webapp/src/main/webapp/'
