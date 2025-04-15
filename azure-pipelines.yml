@@ -23,18 +23,25 @@ stages:
     pool:
       vmImage: $(vmImageName)
 
+     # Maven Build and Test
     steps:
     - task: Maven@4
       inputs:
         mavenPomFile: 'pom.xml'
-        publishJUnitResults: true
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
         codeCoverageToolOption: 'JaCoCo'
         javaHomeOption: 'JDKVersion'
         mavenVersionOption: 'Default'
         mavenAuthenticateFeed: false
         effectivePomSkip: false
-        sonarQubeRunAnalysis: false
+    
+    # Publish JUnit Test Results
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        mergeTestResults: true
+        testRunTitle: 'Junit Test Results'
+
         
     - task: PublishCodeCoverageResults@2
       inputs:
