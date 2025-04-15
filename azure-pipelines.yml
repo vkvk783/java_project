@@ -47,13 +47,6 @@ stages:
       inputs:
         summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
         failIfCoverageEmpty: true
-        
-    # Step 4: SonarCloud Analysis Preparation
-    - task: SonarCloudPrepare@3
-      inputs:
-        SonarQube: 'SonarQube Cloud'
-        organization: 'vkvk783'
-        scannerMode: 'other'
     
     # Step 4: SonarCloud Analysis Preparation
     - task: SonarCloudPrepare@3
