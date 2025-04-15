@@ -40,13 +40,14 @@ stages:
         effectivePomSkip: false
         codeCoverageToolOption: 'JaCoCo'
         
-    
+
     # Publish JUnit Test Results
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        testResultsFiles: '**/TEST-*.xml'
         mergeTestResults: true
+        failTaskOnFailureToPublishResults: true
         testRunTitle: 'Junit Test Results'
     - task: PublishCodeCoverageResults@2
       inputs:
