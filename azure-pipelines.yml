@@ -26,29 +26,24 @@ stages:
      # Maven Build and Test
     steps:
     - task: Maven@4
-      displayName: 'Build and Unit Tests'
       inputs:
         mavenPomFile: 'pom.xml'
-        options: '-DskipTests=true'
-        mavenOptions: '-Xmx3072m'
+        codeCoverageToolOption: 'JaCoCo'
         javaHomeOption: 'JDKVersion'
-        jdkVersionOption: '1.8'
-        jdkArchitectureOption: 'x64'
-        goals: 'clean package'
+        jdkVersionOption: '17'
         mavenVersionOption: 'Default'
         mavenAuthenticateFeed: false
         effectivePomSkip: false
-        codeCoverageToolOption: 'JaCoCo'
-        
-
+    
     # Publish JUnit Test Results
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: '**/TEST-*.xml'
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
         mergeTestResults: true
-        failTaskOnFailureToPublishResults: true
         testRunTitle: 'Junit Test Results'
+
+        
     - task: PublishCodeCoverageResults@2
       inputs:
         summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
@@ -69,12 +64,10 @@ stages:
           sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
 
     - task: SonarCloudPublish@3
-      displayName: 'Publish SonarQube Quality Gate Result'
       inputs:
         pollingTimeoutSec: '300'
 
     - task: SonarCloudAnalyze@3
-      displayName: 'Run SonarQube Analysis'
       inputs:
         jdkversion: 'JAVA_HOME_17_X64'
 
