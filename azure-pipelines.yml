@@ -54,6 +54,20 @@ stages:
         SonarQube: 'SonarQube Cloud'
         organization: 'vkvk783'
         scannerMode: 'other'
+    
+    # Step 4: SonarCloud Analysis Preparation
+    - task: SonarCloudPrepare@3
+      inputs:
+        SonarCloud: 'SonarQube Cloud'
+        organization: 'vkvk783'
+        scannerMode: 'other'
+        configMode: 'manual'
+        cliProjectKey: 'vkvk783_java_project'
+        cliProjectName: 'java_project'
+        cliSources: 'webapp/src/main/webapp/'
+        extraProperties: |
+          sonar.junit.reportPaths=target/surefire-reports
+          sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
 
     - task: SonarCloudPublish@3
       inputs:
