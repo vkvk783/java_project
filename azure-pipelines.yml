@@ -30,6 +30,7 @@ stages:
         mavenPomFile: 'pom.xml'
         codeCoverageToolOption: 'JaCoCo'
         javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '17'
         mavenVersionOption: 'Default'
         mavenAuthenticateFeed: false
         effectivePomSkip: false
