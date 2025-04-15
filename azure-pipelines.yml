@@ -51,10 +51,10 @@ stages:
     # Step 4: SonarCloud Analysis Preparation
     - task: SonarCloudPrepare@3
       inputs:
-        SonarCloud: 'SonarQube Cloud'
+        SonarQube: 'SonarQube Cloud'
         organization: 'vkvk783'
-        scannerMode: 'other'
-        configMode: 'manual'
+        scannerMode: 'cli'
+        configMode: 'file'      
         cliProjectKey: 'vkvk783_java_project'
         cliProjectName: 'java_project'
         cliSources: 'webapp/src/main/webapp/'
