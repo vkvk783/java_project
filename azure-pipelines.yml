@@ -38,6 +38,7 @@ stages:
         mavenVersionOption: 'Default'
         mavenAuthenticateFeed: false
         effectivePomSkip: false
+        codeCoverageToolOption: 'JaCoCo'
         
     
     # Publish JUnit Test Results
@@ -50,9 +51,7 @@ stages:
     - task: PublishCodeCoverageResults@2
       inputs:
         summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
-        reportDirectory: '$(System.DefaultWorkingDirectory)/target/site/jacoco'
         failIfCoverageEmpty: true
-        codeCoverageTool: 'JaCoCo'
     
     # Step 4: SonarCloud Analysis Preparation
     - task: SonarCloudPrepare@3
