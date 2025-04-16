@@ -12,25 +12,17 @@ variables:
   azureSubscription: '94f5cfc1-06a4-4858-93fa-54b1083eab1c'
 
   # Agent VM image name
-  vmImageName: 'ubuntu-latest'
-
-stages:
-- stage: Build
-  displayName: Build stage
-  jobs:
-  - job: MavenPackageAndPublishArtifacts
-    displayName: Maven Package and Publish Artifacts
-    pool:
-      vmImage: $(vmImageName)
+pool:
+ vmImage: ubuntu-latest
 
      # Maven Build and Test
-    steps:
+steps:
     - task: Maven@4
       inputs:
         mavenPomFile: 'pom.xml'
         codeCoverageToolOption: 'JaCoCo'
         javaHomeOption: 'JDKVersion'
-        jdkVersionOption: '17'
+        jdkVersionOption: '1.17'
         mavenVersionOption: 'Default'
         mavenAuthenticateFeed: false
         effectivePomSkip: false
