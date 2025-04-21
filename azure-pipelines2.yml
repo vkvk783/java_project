@@ -1,66 +1,126 @@
+# Maven package Java project Web App to Linux on Azure
+# Build your Java project and deploy it to Azure as a Linux web app
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
 trigger:
-- main  # Or your main branch
+- main
+
+  # Agent VM image name
+pool:
+ vmImage: ubuntu-latest
 
 variables:
 
   # Azure Resource Manager connection created during pipeline creation
   azureSubscription: '94f5cfc1-06a4-4858-93fa-54b1083eab1c'
-  # Agent VM image name
-  vmImage: 'ubuntu-latest'
+  # Defining resource Group variable
+  rg: 'cicd-rg'
 
-steps:
-- task: Maven@3
-  displayName: 'Build and Unit Tests'
-  inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDK version'
-    jdkVersionOption: '1.8' # Adjust as needed
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'clean package'
+stages:
+  - stage: Build
+    displayName: Build
+    jobs:
+    - job: Buildjob
+      displayName: Build
+    pool:
+      vmImage: ubuntu-latest
 
-- task: SonarQubePrepare@5
-  displayName: 'Prepare SonarQube Analysis'
-  inputs:
-    SonarQube: 'YourSonarQubeConnection' # Replace with your SonarQube service connection name
-    scannerMode: 'MSBuild' # Or 'Standalone' if not using MSBuild
-    projectKey: 'your-project-key' # Define a unique key for your project in SonarQube
-    projectName: 'Your Project Name'
+        # Maven Build and Test
+      steps:
+      - task: Maven@4
+        inputs:
+                mavenPomFile: 'pom.xml'
+                codeCoverageToolOption: 'JaCoCo'
+                javaHomeOption: 'JDKVersion'
+                jdkVersionOption: '1.17'
+                mavenVersionOption: 'Default'
+                mavenAuthenticateFeed: false
+                effectivePomSkip: false
+                goals: 'package'
+            
+            # Publish JUnit Test Results
+      - task: PublishTestResults@2
+        inputs:
+                testResultsFormat: 'JUnit'
+                testResultsFiles: '**/surefire-reports/TEST-*.xml'
+                mergeTestResults: true
+                testRunTitle: 'Junit Test Results'
 
-- task: Maven@3
-  displayName: 'Run SonarQube Analysis'
-  inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDK version'
-    jdkVersionOption: '1.8' # Adjust as needed
-    jdkArchitectureOption: 'x64'
-    goals: 'org.sonarsource.scanner.maven:sonar-maven-plugin:sonar'
+                
+      - task: PublishCodeCoverageResults@2
+        inputs:
+                summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
+                failIfCoverageEmpty: true
+            
+            # Step 4: SonarCloud Analysis Preparation
+      - task: SonarCloudPrepare@3
+        inputs:
+                SonarQube: 'SonarQube Cloud'
+                organization: 'vkvk783'
+                scannerMode: 'cli'
+                configMode: 'manual'      
+                cliProjectKey: 'vkvk783_java_project'
+                cliProjectName: 'java_project'
+                cliSources: 'webapp/src/main/webapp/'
+                extraProperties: |
+                  sonar.junit.reportPaths=target/surefire-reports
+                  sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
 
-- task: SonarQubePublish@5
-  displayName: 'Publish SonarQube Quality Gate Result'
-  inputs:
-    pollingTimeoutSec: '300'
+      - task: SonarCloudPublish@3
+        inputs:
+                pollingTimeoutSec: '300'
 
-- task: PublishCodeCoverageResults@2
-  displayName: 'Publish Code Coverage'
-  inputs:
-    codeCoverageTool: 'JaCoCo' # Or 'Cobertura' if you use that
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/target/site/jacoco/jacoco.xml' # Adjust path if needed
-    reportDirectory: '$(System.DefaultWorkingDirectory)/target/site/jacoco'
+      - task: SonarCloudAnalyze@3
+        inputs:
+                jdkversion: 'JAVA_HOME_17_X64'
 
-- task: CopyFiles@2
-  displayName: 'Copy Artifacts'
-  inputs:
-    SourceFolder: '$(System.DefaultWorkingDirectory)'
-    Contents: '**/target/*.?(war|jar)'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      - task: CopyFiles@2
+        displayName: 'Copy Files to artifact staging directory'
+        inputs:
+                SourceFolder: '$(System.DefaultWorkingDirectory)/target'
+                Contents: '*.?(war|jar)'
+                TargetFolder: $(Build.ArtifactStagingDirectory)
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Build Artifacts'
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Build Artifacts'
+        inputs:
+                PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+                ArtifactName: 'drop'
+                publishLocation: 'Container'
+
+  - stage: Deploy
+    displayName: Deploy Stage
+    dependsOn: Build
+    jobs:
+    - deployment: Deployjob
+      displayName: Deploy
+      pool:
+        vmImage: ubuntu-latest
+      environment: Dev
+      strategy:
+       runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Azure subscription 1 (9292b30f-8c84-449e-babe-e773b1bd0e6d)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                  # Create a resource group
+                       az group create --location eastus2 --name $(rg)
+                                                                        
+                       # Create an app service plan of type Linux
+                       az appservice plan create -g $(rg) -n myapp-service-plan --is-linux
+                                                                      
+                       # Create an App Service from the plan with Java SE as the runtime 
+                       # Make sure to have --runtime "JAVA|8-jre8"
+                       az webapp create -g $(rg) -p myapp-service-plan -n cicd-dev-app --runtime "JAVA|8-jre8"
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure subscription 1 (9292b30f-8c84-449e-babe-e773b1bd0e6d)'
+              appType: 'webAppLinux'
+              appName: 'cicd-dev-app'
+              package: '$(Pipeline.Workspace)/**/*.war'
+              runtimeStack: 'JAVA|8-jre8'
