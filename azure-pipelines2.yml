@@ -30,14 +30,21 @@ stages:
       steps:
       - task: Maven@4
         inputs:
-                mavenPomFile: 'pom.xml'
+                azureSubscription: 'Azure subscription 1 (9292b30f-8c84-449e-babe-e773b1bd0e6d)'
+                mavenPomFile: 'java_project /pom.xml'
+                publishJUnitResults: true
+                testResultsFiles: '**/surefire-reports/TEST-*.xml'
+                testRunTitle: 'Junit test'
                 codeCoverageToolOption: 'JaCoCo'
+                codeCoverageFailIfEmpty: true
                 javaHomeOption: 'JDKVersion'
                 jdkVersionOption: '1.17'
                 mavenVersionOption: 'Default'
                 mavenAuthenticateFeed: false
                 effectivePomSkip: false
-                goals: 'package'
+                sonarQubeRunAnalysis: true
+                isJacocoCoverageReportXML: true
+                sqMavenPluginVersionChoice: 'latest'
             
             # Publish JUnit Test Results
       - task: PublishTestResults@2
