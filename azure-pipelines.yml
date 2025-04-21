@@ -116,13 +116,10 @@ stages:
                                          # Create an App Service from the plan with Java SE as the runtime 
                                          # Make sure to have --runtime "JAVA|8-jre8"
                                          az webapp create -g $(rg) -p myapp-service-plan -n cicd-dev-app --runtime "JAVA|8-jre8"
-                 
-           - task: AzureRmWebAppDeployment@5
+           - task: AzureWebApp@1
              inputs:
-               ConnectionType: 'AzureRM'
                azureSubscription: 'Azure subscription 1 (9292b30f-8c84-449e-babe-e773b1bd0e6d)'
                appType: 'webAppLinux'
-               WebAppName: 'cicd-dev-app'
-               packageForLinux: '$(pipeline.workspace)/**/*.?(war|jar)'
-               RuntimeStack: 'JAVA|8-jre8'
-               DeploymentTypeLinux: 'oneDeploy' 
+               appName: 'cicd-dev-app'
+               package: '$(Pipeline.Workspace)/**/*.war'
+               runtimeStack: 'JAVA|8-jre8'
