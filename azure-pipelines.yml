@@ -37,6 +37,7 @@ stages:
                 mavenVersionOption: 'Default'
                 mavenAuthenticateFeed: false
                 effectivePomSkip: false
+                goals: 'package'
             
             # Publish JUnit Test Results
       - task: PublishTestResults@2
@@ -77,8 +78,8 @@ stages:
       - task: CopyFiles@2
         displayName: 'Copy Files to artifact staging directory'
         inputs:
-                SourceFolder: '$(System.DefaultWorkingDirectory)'
-                Contents: '**/target/*.?(war|jar)'
+                SourceFolder: '$(System.DefaultWorkingDirectory)/target'
+                Contents: '*.?(war|jar)'
                 TargetFolder: $(Build.ArtifactStagingDirectory)
 
       - task: PublishBuildArtifacts@1
