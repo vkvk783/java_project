@@ -10,69 +10,119 @@ variables:
 
   # Azure Resource Manager connection created during pipeline creation
   azureSubscription: '94f5cfc1-06a4-4858-93fa-54b1083eab1c'
+  # Defining resource Group variable
+  rg: 'cicd-rg'
 
   # Agent VM image name
 pool:
  vmImage: ubuntu-latest
 
-     # Maven Build and Test
-steps:
-    - task: Maven@4
-      inputs:
-        mavenPomFile: 'pom.xml'
-        codeCoverageToolOption: 'JaCoCo'
-        javaHomeOption: 'JDKVersion'
-        jdkVersionOption: '1.17'
-        mavenVersionOption: 'Default'
-        mavenAuthenticateFeed: false
-        effectivePomSkip: false
-    
-    # Publish JUnit Test Results
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
-        mergeTestResults: true
-        testRunTitle: 'Junit Test Results'
+stages:
+- stage: Build
+  displayName: Build
+  jobs:
+  - job: Build
+    displayName: Build
+  pool:
+    vmImage: ubuntu-latest
 
-        
-    - task: PublishCodeCoverageResults@2
-      inputs:
-        summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
-        failIfCoverageEmpty: true
-    
-    # Step 4: SonarCloud Analysis Preparation
-    - task: SonarCloudPrepare@3
-      inputs:
-        SonarQube: 'SonarQube Cloud'
-        organization: 'vkvk783'
-        scannerMode: 'cli'
-        configMode: 'manual'      
-        cliProjectKey: 'vkvk783_java_project'
-        cliProjectName: 'java_project'
-        cliSources: 'webapp/src/main/webapp/'
-        extraProperties: |
-          sonar.junit.reportPaths=target/surefire-reports
-          sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
+      # Maven Build and Test
+    steps:
+      - task: Maven@4
+        inputs:
+          mavenPomFile: 'pom.xml'
+          codeCoverageToolOption: 'JaCoCo'
+          javaHomeOption: 'JDKVersion'
+          jdkVersionOption: '1.17'
+          mavenVersionOption: 'Default'
+          mavenAuthenticateFeed: false
+          effectivePomSkip: false
+      
+      # Publish JUnit Test Results
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          mergeTestResults: true
+          testRunTitle: 'Junit Test Results'
 
-    - task: SonarCloudPublish@3
-      inputs:
-        pollingTimeoutSec: '300'
+          
+      - task: PublishCodeCoverageResults@2
+        inputs:
+          summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
+          failIfCoverageEmpty: true
+      
+      # Step 4: SonarCloud Analysis Preparation
+      - task: SonarCloudPrepare@3
+        inputs:
+          SonarQube: 'SonarQube Cloud'
+          organization: 'vkvk783'
+          scannerMode: 'cli'
+          configMode: 'manual'      
+          cliProjectKey: 'vkvk783_java_project'
+          cliProjectName: 'java_project'
+          cliSources: 'webapp/src/main/webapp/'
+          extraProperties: |
+            sonar.junit.reportPaths=target/surefire-reports
+            sonar.jacoco.reportPaths=target/site/jacoco/jacoco.xml
 
-    - task: SonarCloudAnalyze@3
-      inputs:
-        jdkversion: 'JAVA_HOME_17_X64'
+      - task: SonarCloudPublish@3
+        inputs:
+          pollingTimeoutSec: '300'
 
-    - task: CopyFiles@2
-      displayName: 'Copy Files to artifact staging directory'
-      inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)'
-        Contents: '**/target/*.?(war|jar)'
-        TargetFolder: $(Build.ArtifactStagingDirectory)
+      - task: SonarCloudAnalyze@3
+        inputs:
+          jdkversion: 'JAVA_HOME_17_X64'
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Build Artifacts'
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
+      - task: CopyFiles@2
+        displayName: 'Copy Files to artifact staging directory'
+        inputs:
+          SourceFolder: '$(System.DefaultWorkingDirectory)'
+          Contents: '**/target/*.?(war|jar)'
+          TargetFolder: $(Build.ArtifactStagingDirectory)
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Build Artifacts'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'drop'
+          publishLocation: 'Container'
+
+- stage: Deploy
+  displayName: Deploy Stage
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: ubuntu-latest
+    environment: Dev
+    strategy:
+     runOnce:
+       deploy:
+         steps:
+           - task: AzureCLI@2
+             inputs:
+               azureSubscription: 'Azure subscription 1 (9292b30f-8c84-449e-babe-e773b1bd0e6d)'
+               scriptType: 'bash'
+               scriptLocation: 'inlineScript'
+               inlineScript: |
+                 # Create a resource group
+                                         az group create --location eastus2 --name $(rg)
+                                                                       
+                                         # Create an app service plan of type Linux
+                                         az appservice plan create -g $(rg) -n myapp-service-plan --is-linux
+                                                                       
+                                         # Create an App Service from the plan with Java SE as the runtime 
+                                         # Make sure to have --runtime "JAVA|8-jre8"
+                                         az webapp create -g $(rg) -p myapp-service-plan -n cicd-dev-app --runtime "JAVA|8-jre8"
+                 
+           - task: AzureRmWebAppDeployment@5
+             inputs:
+               ConnectionType: 'AzureRM'
+               azureSubscription: 'Azure subscription 1 (9292b30f-8c84-449e-babe-e773b1bd0e6d)'
+               appType: 'webAppLinux'
+               WebAppName: 'cicd-dev-app'
+               packageForLinux: '$(pipeline.workspace)/**/*.?(war|jar)'
+               RuntimeStack: 'JAVA|8-jre8'
+               DeploymentTypeLinux: 'oneDeploy' 
